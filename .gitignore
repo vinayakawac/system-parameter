@@ -1,0 +1,32 @@
+# Private design references
+/rxd-design-system/
+
+# Local browser verification artifacts
+/.playwright-mcp/
+/system-parameter-*.png
+/playwright-report/
+/test-results/
+
+# Dependencies and generated output
+/node_modules/
+/dist/
+/build/
+/coverage/
+/.cache/
+/.vite/
+*.log
+
+# Local credentials and configuration
+.env
+.env.*
+!.env.example
+.npmrc
+/.codex/
+/.agents/
+/.vscode/
+/.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
