@@ -10,6 +10,12 @@ npm start
 
 Open http://localhost:4173. Run `npm run check` for JavaScript syntax checks.
 
+## Vercel deployment
+
+`vercel.json` selects the Other framework preset, runs `npm run build`, and publishes `dist/` as a static site. The build copies only `index.html`, `styles.css`, `app.js`, and `data.js`; the local server and private references are not deployment assets.
+
+`server.mjs` is for local preview only. This browser-based prototype does not require a Vercel server function. Push an explicitly authorized commit to the connected `main` branch to trigger deployment.
+
 ## Included
 
 - Four PRD columns. Only System Parameter Value is editable.
@@ -32,7 +38,7 @@ Open http://localhost:4173. Run `npm run check` for JavaScript syntax checks.
 | `_remarks` | Map to `remarks` (read-only). |
 | Save task `depsysparmainpgsavtr` | Submit all modified records in one task. |
 | Service `Cdepsysparmainpgsavtrsr` | Replace localStorage write with the save service; update baseline only on confirmed success. |
-| RBAC | Enforce role–organization-unit authorization on both fetch and save. The sample identity is visual context only. |
+| RBAC | Enforce role–organization-unit authorization on both fetch and save. Authentication and authorization are not connected in this prototype. |
 
 `data.js` contains illustrative names, values, and validators because actual parameter records and service contracts were not supplied. Replace these with backend-owned parameter definitions; do not infer validation by parsing display text in a production adapter.
 

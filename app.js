@@ -1,14 +1,10 @@
 import { parameters, validate } from './data.js';
 
 const paths = {
-  building: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 21v-4h6v4M8 7h1m6 0h1M8 11h1m6 0h1"/>',
   layers: '<path d="m12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5"/>',
   sliders: '<path d="M4 6h6m4 0h6M4 12h10m4 0h2M4 18h2m4 0h10"/><circle cx="12" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="8" cy="18" r="2"/>',
-  'chevron-down': '<path d="m6 9 6 6 6-6"/>',
   'chevron-right': '<path d="m9 6 6 6-6 6"/>',
   'chevron-left': '<path d="m15 6-6 6 6 6"/>',
-  shield: '<path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z"/><path d="m9 12 2 2 4-4"/>',
-  grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4m0 3h.01"/>',
   edit: '<path d="m15 4 5 5M4 20l5-1L20 8a2 2 0 0 0-5-5L4 14l-1 7 6-2"/>',
   search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/>',
@@ -49,7 +45,8 @@ function updateStatus() {
   $('save-label').textContent = saving ? 'Saving…' : 'Save changes';
   $('status-icon').innerHTML = icon(saving ? 'clock' : changed ? 'edit' : 'check-circle');
   $('status-title').textContent = saving ? 'Saving your changes' : changed ? `${changed} unsaved ${changed === 1 ? 'change' : 'changes'}` : savedAt ? 'All changes saved' : 'No unsaved changes';
-  $('status-detail').textContent = saving ? 'Keep this workspace open until saving is complete.' : changed ? 'Review your updates, then save them together.' : savedAt ? `Saved in this browser at ${savedAt}.` : "Changes are saved together when you're ready.";
+  $('status-detail').textContent = savedAt && !changed && !saving ? `Saved in this browser at ${savedAt}.` : '';
+  $('status-detail').hidden = !$('status-detail').textContent;
 }
 function render({ resetScroll = false } = {}) {
   const records = matching();
