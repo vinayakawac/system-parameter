@@ -172,7 +172,7 @@ const SystemParameterPage = () => {
           <NbParagraph id="page-description" content="Edit System Parameter Value using the listed accepted values. Save changes applies all modified rows." size="font-13" color="neutral" />
         </div>
 
-        <NbPanel id="parameter-panel" showHeader={false} hideCaption enableborder={true} enableShadow={false} enablePadding={false}>
+        <NbPanel id="parameter-panel" showHeader={false} hideCaption enableborder={false} enableShadow={false} enablePadding={false}>
           <div className="flex flex-col gap-4 p-6">
             <div className="flex items-center gap-2">
               <NbHeading id="grid-title" content="Parameter details" tag="h4" weight="font-semibold" />

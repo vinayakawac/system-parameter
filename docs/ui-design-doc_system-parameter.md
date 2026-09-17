@@ -18,7 +18,7 @@ Body-only page. The navbar, sidebar and app shell come from the runtime and are 
 | Skip link | `div` — `sr-only focus-within:not-sr-only` | `NbHyperlink` (`variant="primary"`, `wordWrap="nowrap"`) | Links and navigation |
 | Page header row | `div` — `flex items-center justify-between gap-4 px-6 py-3` | `NbBreadcrumbs`; `NbBadge` (sample-data marker); `NbButton` ghost (Help) | Navigation · Display · Action |
 | Page title block | `div` — `flex flex-col gap-2` inside `section p-6 gap-6` | `NbHeading tag="h2"`; `NbParagraph size="font-13" color="neutral"` | Typography |
-| Titled section container | — | `NbPanel` (`enableborder`, no header, no padding; inner `div p-6 gap-4`) | Containers · Panel |
+| Titled section container | — | `NbPanel` (no border, no shadow, no header, no padding; inner `div p-6 gap-4`) | Containers · Panel |
 | Section title | `div` — `flex items-center gap-2` | `NbHeading tag="h4"`; `NbBadge` (record count) | Typography · Display |
 | Toolbar | `div` — `flex md:justify-end` | `NbTextbox` search with `startIcon`. (A view-mode filter such as All / Modified would be `NbToggleButtonGroup`, not `NbTab`; removed because a single option remains.) | Form inputs |
 | Save error | `div role="alert"` | `NbParagraph color="error"` | Feedback |
