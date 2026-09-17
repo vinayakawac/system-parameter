@@ -1,5 +1,5 @@
 # Private design references
-/rxd-design-system/
+.rxd-desgin/
 
 # Local browser verification artifacts
 /.playwright-mcp/
