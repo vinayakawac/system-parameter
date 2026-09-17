@@ -190,7 +190,7 @@ const SystemParameterPage = () => {
 
             {saveError && <div role="alert"><NbParagraph id="save-error" content={saveError} color="error" size="font-14" enableWordWrap /></div>}
 
-            <div className="relative min-h-[240px] max-h-[640px] overflow-auto" ref={gridRef} tabIndex={0} aria-label="Scrollable parameter grid">
+            <div className="relative min-h-[240px] max-h-[640px] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-[1]" ref={gridRef} tabIndex={0} aria-label="Scrollable parameter grid">
               {saving && <NbLoader id="parameter-loader" active withOverlay={false} size="medium" position="container" caption="Saving…" enableCaption />}
               <div className="min-w-[960px]">
                 <NbTable id="parameter-table" hideCaption
