@@ -1,51 +1,75 @@
-# System Parameter — RXD UI prototype
+# System Parameter
 
-A desktop-first, interactive System Parameter screen based on the supplied PRD and RXD design-system references. Private design references and local verification artifacts are excluded from this repository. No installation or build step is required.
+React implementation of the System Parameter PRD using the official `@ramco-platform/studio-components@3.0.0-studio.55` Nebula library. The former custom `nebula.js` and `nebula.css` layer has been removed.
 
-## Run
+## Run locally
+
+Use Node.js 22.12+ or 24. Installation requires access to the private Ramco packages through your local npm configuration. Registry configuration and credentials are excluded from this repository.
 
 ```powershell
+npm ci --ignore-scripts --legacy-peer-deps
 npm start
 ```
 
-Open http://localhost:4173. Run `npm run check` for JavaScript syntax checks.
+Open http://localhost:4173. `legacy-peer-deps` is required because the library bundles dependencies with conflicting React peer ranges; this app uses React 18.3.1, supported by Nebula.
 
-## Vercel deployment
+```powershell
+npm run check
+npm test
+npm run build
+npm run preview
+```
 
-`vercel.json` selects the Other framework preset, runs `npm run build`, and publishes `dist/` as a static site. The build copies only `index.html`, `styles.css`, `app.js`, and `data.js`; the local server and private references are not deployment assets.
+Stop the dev server before starting the preview: both use port 4173. `build` produces static assets in `dist/`; `preview` serves that production build locally.
 
-`server.mjs` is for local preview only. This browser-based prototype does not require a Vercel server function. Push an explicitly authorized commit to the connected `main` branch to trigger deployment.
+## Official components
 
-## Included
-
-- Four PRD columns. Only System Parameter Value is editable.
-- 64 clearly labeled sample parameters, 48 records per page, a 16-row desktop viewport, and sticky column headers.
-- Search, modified-only review, retained drafts across pages and filters, and discard of unsaved changes.
-- One Save action for all modified records; blur/submit validation, saving feedback, success notification, and recoverable failure feedback.
-- Saved sample values persist in browser localStorage. No production services or authentication are connected.
-- Accessible labels, visible keyboard focus, search shortcut `/`, save shortcut `Ctrl/Cmd+S`, reduced motion, and a compact layout with horizontal table scrolling.
-- Smaller screens preserve readable columns through horizontal scrolling. Below 600px the table viewport reduces to 520px.
-
-## Production integration boundary
-
-| PRD item | Integration requirement |
+| UI | Package component |
 | --- | --- |
-| ILBO `systemparameter` | Initialize the screen and resolve authorized role/OU context server-side. |
-| Default fetch `Cdepsysparmainpgdeffetchsr` | Replace sample records with the `spdref` segment. |
-| `_systemparametername` | Map to `name` (read-only). |
-| `_systemparametervalue` | Map to `value` (editable). |
-| `_acceptedvalue` | Map to `accepted` (read-only). |
-| `_remarks` | Map to `remarks` (read-only). |
-| Save task `depsysparmainpgsavtr` | Submit all modified records in one task. |
-| Service `Cdepsysparmainpgsavtrsr` | Replace localStorage write with the save service; update baseline only on confirmed success. |
-| RBAC | Enforce role–organization-unit authorization on both fetch and save. Authentication and authorization are not connected in this prototype. |
+| Batch Save, Discard, filters, Help | `NbButton` |
+| Inline parameter values and search | `NbTextbox` |
+| Four-column parameter grid | `NbTable` with `NbTextbox` value cells |
+| Parameter panel | `NbPanel` |
+| Record count and sample marker | `NbBadge` |
+| Page navigation | `NbPagination` |
+| Help dialog | `NbDialogModal` |
+| No matches / no modifications | `NbEmptyState` |
+| Breadcrumb and navigation links | `NbBreadcrumbs`, `NbHyperlink` |
+| Headings, metadata, validation summary and save status | `NbHeading`, `NbParagraph` |
 
-`data.js` contains illustrative names, values, and validators because actual parameter records and service contracts were not supplied. Replace these with backend-owned parameter definitions; do not infer validation by parsing display text in a production adapter.
+All UI controls are imported from the official package. Native semantic HTML supplies the page landmarks and layout wrappers. `styles.css` controls page composition, table density, modified-row highlighting, and responsive positioning; it does not recreate the controls. Nebula supplies its own styles, fonts and icons. Its internal dependencies include other UI libraries; this application does not import those directly.
 
-The PRD says “No error state” but explicitly requires errors and correction after failed saves. This design includes local field and save feedback for that specified workflow.
+The distributed Nebula package is a single large module with icon collections and embedded styles. The production bundle is correspondingly large; the application uses the package as published without modifying its source. Its default focused invalid textbox retains a blue focus border while exposing `aria-invalid` and its error message.
 
-## Visual system
+## Behavior
 
-RXD brand blue, neutral surfaces, IBM Plex Sans / Mono, 8px control radii, 12px panel radius, 40px controls and rows, 32px inline editors, and the 8/16/24 spacing rhythm. Layout dimensions such as the navigation width and table columns are composition-specific. Secondary metadata uses the RXD 10–13px heading/caption scales; main table names use 13px. Fonts load from Google Fonts with system fallbacks when offline.
+- Four PRD columns; only System Parameter Value is editable.
+- 64 illustrative parameters, 48 records per page, and a desktop grid viewport for 16 standard rows.
+- Draft values survive search, filters and pagination. Modified rows are highlighted.
+- One Save action validates and persists every modified row. Invalid values focus the first error; storage failures preserve drafts for retry.
+- Sample values persist in browser localStorage. This is not a production backend.
+- Discard restores the saved values. Keyboard shortcuts: `/` searches; Ctrl/Cmd+S saves.
+- Compact screens retain horizontal table scrolling and accessible controls.
 
-Files: `index.html` (layout), `styles.css` (tokens and responsive styling), `app.js` (interactions and simulated persistence), `data.js` (sample records), and `server.mjs` (local-only server).
+## PRD integration boundary
+
+Role–organization-unit access and enterprise services remain unconnected. Replace sample data in `data.js` and localStorage persistence in `app.jsx` when service contracts are available.
+
+| PRD contract | Integration |
+| --- | --- |
+| `Cdepsysparmainpgdeffetchsr`, `spdref` | Fetch parameter rows |
+| `_systemparametername` | `name`, read-only |
+| `_systemparametervalue` | `value`, editable |
+| `_acceptedvalue` | `accepted`, read-only |
+| `_remarks` | `remarks`, read-only |
+| `depsysparmainpgsavtr`, `Cdepsysparmainpgsavtrsr` | Persist modified rows in one batch |
+
+## Confidential files
+
+`.gitignore` excludes local registry credentials, environment files, the RXD design folder, private reference documents, node_modules, generated builds and browser artifacts. Do not put tokens in source code or use a `VITE_`-prefixed environment variable for secrets: those variables are exposed to browser code.
+
+`npm run check:secrets` scans tracked and unignored working-tree text files; `npm run check:secrets -- --staged` scans staged blobs. Findings show paths and categories without printing matching values. Environment-only npm token references are allowed; literal tokens are rejected. This is a heuristic scanner, not a Git-history audit or a guarantee against every secret format. Binary files are counted but not content-scanned.
+
+Enable the commit hook per clone with `git config core.hooksPath .githooks`. Tests use isolated temporary repositories and do not modify this repository's index.
+
+Vercel configuration and deployment are unchanged by the Nebula migration, at the user's request. The existing deployment setup predates the new private-package build requirements.

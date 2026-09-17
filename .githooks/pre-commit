@@ -1,0 +1,5 @@
+#!/bin/sh
+# Blocks a commit that stages credentials or confidential references.
+# Enable once per clone:
+#   git config core.hooksPath .githooks
+exec node "$(git rev-parse --show-toplevel)/scripts/check-secrets.mjs" --staged

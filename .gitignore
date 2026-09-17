@@ -1,33 +1,131 @@
-# Private design references
-.rxd-desgin/
+# ---------------------------------------------------------------------------
+# System Parameter prototype - ignore rules
+#
+# Confidential material (registry credentials, private design references,
+# PRDs, internal screenshots) must never reach GitHub. `npm run check:secrets`
+# scans tracked or staged files for leaked credentials, and the
+# .githooks/pre-commit hook runs that scan before every commit.
+# ---------------------------------------------------------------------------
 
-# Local browser verification artifacts
-/.playwright-mcp/
-/system-parameter-*.png
-/playwright-report/
-/test-results/
-
-# Dependencies and generated output
-/node_modules/
-/dist/
-/build/
-/coverage/
-/.cache/
-/.vite/
-/.vercel/
-*.log
-
-# Local credentials and configuration
+# --- Credentials, tokens and machine-local configuration -------------------
 .env
 .env.*
 !.env.example
+*.env
 .npmrc
-/.codex/
-/.agents/
-/.vscode/
-/.idea/
+npmrc
+*.npmrc
+.npmrc.example
+.yarnrc
+.yarnrc.yml
+.netrc
+_netrc
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.asc
+*.gpg
+id_rsa*
+id_ed25519*
+*.token
+*.secret
+*.secrets
+*secret*.json
+credentials*.json
+service-account*.json
+*.credentials
+secrets/
+.secrets/
+.aws/
+.azure/
+.gcloud/
+.docker/
+.vercel/
+.netlify/
+*.local
+*.local.*
 
-# Operating system files
+# --- Private design references and product documents -----------------------
+rxd-design-system/
+.rxd-design/
+.rxd-desgin/
+design-references/
+prd/
+PRD/
+private/
+confidential/
+docs/private/
+*.prd.md
+*.confidential.*
+*.private.*
+/*.pdf
+/*.docx
+/*.pptx
+/*.xlsx
+/*.fig
+/*.sketch
+
+# --- Local browser verification artifacts ----------------------------------
+.playwright-mcp/
+playwright-report/
+test-results/
+playwright/.cache/
+.lighthouseci/
+/*.png
+/*.jpg
+/*.jpeg
+/*.gif
+/*.webp
+/*.mp4
+/*.webm
+*.har
+*.trace.zip
+
+# --- Dependencies and generated output -------------------------------------
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+.vite/
+.turbo/
+.parcel-cache/
+.pnpm-store/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# --- Agent, editor and tool state ------------------------------------------
+.codex/
+.agents/
+.claude/
+CLAUDE.local.md
+.cursor/
+.windsurf/
+.aider*
+.vscode/
+.idea/
+*.code-workspace
+.history/
+*.swp
+*.swo
+*~
+*.orig
+*.rej
+
+# --- Operating system files -------------------------------------------------
 .DS_Store
+.AppleDouble
+._*
 Thumbs.db
+ehthumbs.db
 Desktop.ini
+$RECYCLE.BIN/
