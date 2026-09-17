@@ -1,11 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
-  NbBadge, NbBreadcrumbs, NbButton, NbDialogModal, NbEmptyState,
-  NbHeading, NbHyperlink, NbPagination, NbPanel, NbParagraph, NbTable, NbTextbox,
+  NbActionIcon, NbBadge, NbBreadcrumbs, NbButton, NbDialogModal, NbEmptyState, NbHeading, NbHyperlink,
+  NbLoader, NbPagination, NbPanel, NbParagraph, NbTable, NbTextbox,
 } from '@ramco-platform/studio-components';
 import { parameters, validate } from './data.js';
 import './styles.css';
+
+// Body-only page: the navbar, sidebar and app shell come from the runtime (rui-page-builder golden example).
+// Composition plan: docs/ui-design-doc_system-parameter.md
 
 const STORAGE_KEY = 'rxd-system-parameters-v1';
 const PAGE_SIZE = 48;
@@ -17,7 +20,7 @@ function loadValues() {
   ]));
 }
 
-function App() {
+const SystemParameterPage = () => {
   const [baseline, setBaseline] = useState(loadValues);
   const [drafts, setDrafts] = useState(() => ({ ...baseline }));
   const [query, setQuery] = useState('');
@@ -129,91 +132,127 @@ function App() {
     editorRefs.current[p.id] ||= React.createRef();
     const modified = drafts[p.id] !== baseline[p.id];
     return { id: `row-${p.id}-`, text: [
-      <NbParagraph key={`name-${p.id}`} id={`name-${p.id}`} content={p.name} size="font-13" weight="font-medium" />,
-      <NbTextbox key={`value-${p.id}`} id={`value-${p.id}`} ref={editorRefs.current[p.id]}
-        name={p.id} caption={`${p.name} value`} hideCaption size="small" variant="standard"
-        value={drafts[p.id]} disabled={saving} enableInheritWidth autoFill="off" disableSanitize
-        className={modified ? 'parameter-editor is-modified' : 'parameter-editor'}
-        error={Boolean(errors[p.id])} helpTask={errors[p.id] || undefined}
-        ariaDescribedby={errors[p.id] ? undefined : `accepted-${p.id}`}
-        onChange={({ value }) => edit(p, value)} onBlur={({ event }) => blur(p, event.target.value)} />,
+      <NbParagraph key={`name-${p.id}`} id={`name-${p.id}`} content={p.name} size="font-13" weight="font-medium" enableTooltip />,
+      <div key={`value-${p.id}`} className="flex items-center gap-2">
+        <NbTextbox id={`value-${p.id}`} ref={editorRefs.current[p.id]}
+          name={p.id} caption={`${p.name} value`} hideCaption size="medium" variant="standard"
+          value={drafts[p.id]} disabled={saving} enableInheritWidth autoFill="off" disableSanitize
+          error={Boolean(errors[p.id])} helpTask={errors[p.id] || undefined}
+          ariaDescribedby={errors[p.id] ? undefined : `accepted-${p.id}`}
+          onChange={({ value }) => edit(p, value)} onBlur={({ event }) => blur(p, event.target.value)} />
+        {modified && <NbBadge id={`modified-${p.id}`} content="Modified" color="primary" size="medium" />}
+      </div>,
       <NbParagraph key={`accepted-${p.id}`} id={`accepted-${p.id}`} content={p.accepted} size="font-13" enableTooltip />,
       <NbParagraph key={`remarks-${p.id}`} id={`remarks-${p.id}`} content={p.remarks} size="font-13" enableTooltip />,
     ] };
   }) };
 
-  return <>
-    <div className="skip-link"><NbHyperlink id="skip-to-main" url="#main" content="Skip to parameters" openLinkinSamePage variant="primary" wordWrap="nowrap" /></div>
-    <aside className="app-sidebar" aria-label="Application navigation">
-      <NbParagraph id="nav-section" content="Administration" size="font-13" weight="font-medium" />
-      <NbHyperlink id="nav-current" url="#main" content="System parameter" openLinkinSamePage variant="primary" wordWrap="nowrap" startIcon={{ iconKey: 'Settings2' }} />
-    </aside>
-    <div className="app">
-      <header className="topbar">
-        <NbBreadcrumbs id="breadcrumbs" items={[{ value: 'Administration' }, { value: 'System parameter' }]} handleBreadcrumbClick={() => {}} />
-        <div className="topbar-actions">
-          <NbBadge id="sample-data" content="Sample data" color="neutral" size="small" />
-          <NbButton id="help-button" caption="Help" ariaLabel="About this prototype" variant="ghost" size="small" onClick={() => setHelpOpen(true)} />
+  const statusText = saving ? 'Saving changes…'
+    : changed.length ? `${changed.length} unsaved ${changed.length === 1 ? 'change' : 'changes'}`
+    : notice || 'No unsaved changes';
+
+  return (
+    <div className="theme-rxd flex min-h-screen bg-white">
+      {/* Compact icon rail: stands in for the runtime shell's sidebar in this standalone prototype. */}
+      <div className="flex w-14 shrink-0 flex-col items-center gap-2 border-r border-gray-200 py-3" role="navigation" aria-label="Application navigation">
+        <NbActionIcon id="nav-menu" Icon="Menu" size="medium" variant="square" color="neutral" ariaLabel="Toggle navigation" tooltip="Menu" onClick={() => {}} />
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <NbActionIcon id="nav-home" Icon="Home" size="medium" variant="square" color="neutral" ariaLabel="Home" tooltip="Home" onClick={() => {}} />
+          <NbActionIcon id="nav-projects" Icon="LayoutGrid" size="medium" variant="square" color="neutral" ariaLabel="Projects" tooltip="Projects" onClick={() => {}} />
+          <NbActionIcon id="nav-admin" Icon="Settings" size="medium" variant="square" color="primary" showBorder ariaLabel="Administration, current section" tooltip="Administration" onClick={() => {}} />
+          <NbActionIcon id="nav-filters" Icon="Filter" size="medium" variant="square" color="neutral" ariaLabel="Filters" tooltip="Filters" onClick={() => {}} />
         </div>
-      </header>
-      <main id="main" tabIndex={-1}>
-        <NbHeading id="page-title" content="System Parameter" tag="h1" fontSize="font-24" weight="font-semibold" />
-        <NbPanel id="parameter-panel" className="parameter-panel" showHeader={false} hideCaption enableborder enableShadow={false} enablePadding={false}>
-          <div className="panel-heading">
-            <NbHeading id="grid-title" content="Parameter details" tag="h2" fontSize="font-16" weight="font-semibold" />
-            <NbBadge id="total-count" content={parameters.length} color="neutral" size="small" />
-          </div>
-          <div className="panel-toolbar">
-            <div className="filter-actions" role="group" aria-label="Filter parameters">
-              <NbButton id="filter-all" caption="All parameters" variant={filter === 'all' ? 'secondary' : 'ghost'} size="small" ariaPressed={filter === 'all'} onClick={() => { setFilter('all'); setPage(1); }} />
-              <NbButton id="filter-modified" caption={`Modified (${changed.length})`} variant={filter === 'modified' ? 'secondary' : 'ghost'} size="small" ariaPressed={filter === 'modified'} onClick={() => { setFilter('modified'); setPage(1); }} />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="sr-only focus-within:not-sr-only focus-within:fixed focus-within:top-2 focus-within:left-4 focus-within:z-50 focus-within:p-2">
+        <NbHyperlink id="skip-to-main" url="#main" content="Skip to parameters" openLinkinSamePage variant="primary" wordWrap="nowrap" />
+      </div>
+
+      <div className="flex items-center justify-between gap-4 px-6 py-3">
+        <NbBreadcrumbs id="breadcrumbs" items={[{ value: 'Administration' }, { value: 'System parameter' }]} handleBreadcrumbClick={() => {}} />
+        <div className="flex items-center gap-2">
+          <NbBadge id="sample-data" content="Sample data" color="neutral" size="medium" />
+          <NbButton id="help-button" caption="Help" ariaLabel="About this prototype" variant="ghost" size="medium" onClick={() => setHelpOpen(true)} />
+        </div>
+      </div>
+
+      <section id="main" tabIndex={-1} className="flex flex-col gap-6 p-6">
+        <div className="flex flex-col gap-2">
+          <NbHeading id="page-title" content="System Parameter" tag="h2" weight="font-semibold" />
+          <NbParagraph id="page-description" content="Edit System Parameter Value using the listed accepted values. Save changes applies all modified rows." size="font-13" color="neutral" />
+        </div>
+
+        <NbPanel id="parameter-panel" showHeader={false} hideCaption enableborder={true} enableShadow={false} enablePadding={false}>
+          <div className="flex flex-col gap-4 p-6">
+            <div className="flex items-center gap-2">
+              <NbHeading id="grid-title" content="Parameter details" tag="h4" weight="font-semibold" />
+              <NbBadge id="total-count" content={parameters.length} color="neutral" size="medium" />
             </div>
-            <NbTextbox id="parameter-search" ref={searchRef} name="search" caption="Search parameters" hideCaption
-              value={query} placeholder="Search parameters…" autoFill="off" size="large" width="100%"
-              className="parameter-search" startIcon={{ iconKey: 'Search' }}
-              onChange={({ value }) => { setQuery(value); setPage(1); setActiveId(null); }} />
-          </div>
-          {saveError && <div className="save-error" role="alert"><NbParagraph id="save-error" content={saveError} color="error" size="font-14" enableWordWrap /></div>}
-          <div className="table-viewport" ref={gridRef} tabIndex={0} aria-label="Scrollable parameter grid, 16 visible rows">
-            <NbTable id="parameter-table" className="parameter-table" hideCaption
-              caption="System parameters. Only System Parameter Value is editable."
-              enableHeader enableFooter={false} variant="default"
-              headerData={{ id: 'column-', data: ['System Parameter Name', 'System Parameter Value', 'Accepted Value', 'Remarks'], columnWidth: ['25%', '21%', '24%', '30%'] }} tableData={tableData} />
-            {!records.length && <NbEmptyState id="empty-state" enableText enableSubText enableButton1
-              enableImage={false} enableButton2={false}
-              text={{ id: 'empty-title', tag: 'h3', fontSize: 'font-16', content: filter === 'modified' && !query ? 'No modified parameters' : 'No matching parameters' }}
-              subText={{ id: 'empty-description', size: 'font-14', content: filter === 'modified' && !query ? 'Your changes will appear here as you edit values.' : 'Try a different name, value, or remark.' }}
-              button1={{ id: 'clear-filters', caption: 'View all parameters', variant: 'secondary', onClick: clearFilters }} />}
-          </div>
-          <div className="pagination-bar">
-            <NbParagraph id="range-label" size="font-13" content={records.length ? `${start + 1}–${Math.min(start + PAGE_SIZE, records.length)} of ${records.length} parameters · 48 per page` : '0 parameters'} />
-            <NbPagination id="pagination" variant="number" activePage={currentPage} pageCount={pageCount}
-              enablePrevLink enableNextLink enableFirstLink={false} enableLastLink={false} enableGoToBox={false}
-              pageRangeDisplayed={3} breakLabel="…" onPageChange={(_, next) => setPage(Math.max(1, Math.min(next, pageCount)))} />
+
+            <div className="flex max-md:flex-col gap-4 md:items-center md:justify-between">
+              <div className="flex flex-wrap items-center gap-2 shrink-0" role="group" aria-label="Filter parameters">
+                <NbButton id="filter-all" caption="All parameters" variant={filter === 'all' ? 'secondary' : 'ghost'} size="medium" ariaPressed={filter === 'all'} onClick={() => { setFilter('all'); setPage(1); }} />
+                <NbButton id="filter-modified" caption={`Modified (${changed.length})`} variant={filter === 'modified' ? 'secondary' : 'ghost'} size="medium" ariaPressed={filter === 'modified'} onClick={() => { setFilter('modified'); setPage(1); }} />
+              </div>
+              <div className="max-md:w-full md:w-80 shrink-0">
+                <NbTextbox id="parameter-search" ref={searchRef} name="search" caption="Search parameters" hideCaption
+                  value={query} placeholder="Search parameters…" autoFill="off" size="medium" enableInheritWidth
+                  startIcon={{ iconKey: 'Search' }}
+                  onChange={({ value }) => { setQuery(value); setPage(1); setActiveId(null); }} />
+              </div>
+            </div>
+
+            {saveError && <div role="alert"><NbParagraph id="save-error" content={saveError} color="error" size="font-14" enableWordWrap /></div>}
+
+            <div className="relative min-h-[240px] max-h-[640px] overflow-auto" ref={gridRef} tabIndex={0} aria-label="Scrollable parameter grid">
+              {saving && <NbLoader id="parameter-loader" active withOverlay={false} size="medium" position="container" caption="Saving…" enableCaption />}
+              <div className="min-w-[960px]">
+                <NbTable id="parameter-table" hideCaption
+                  caption="System parameters. Only System Parameter Value is editable."
+                  enableHeader enableFooter={false} variant="default"
+                  headerData={{ id: 'column-', data: ['System Parameter Name', 'System Parameter Value', 'Accepted Value', 'Remarks'], columnWidth: ['25%', '25%', '22%', '28%'] }} tableData={tableData} />
+              </div>
+              {!records.length && <NbEmptyState id="empty-state" enableText enableSubText enableButton1
+                enableImage={false} enableButton2={false}
+                text={{ id: 'empty-title', tag: 'h4', weight: 'font-semibold', content: filter === 'modified' && !query ? 'No modified parameters' : 'No matching parameters' }}
+                subText={{ id: 'empty-description', size: 'font-14', content: filter === 'modified' && !query ? 'Your changes will appear here as you edit values.' : 'Try a different name, value, or remark.' }}
+                button1={{ id: 'clear-filters', caption: 'View all parameters', variant: 'secondary', size: 'medium', onClick: clearFilters }} />}
+            </div>
+
+            <div className="flex max-md:flex-col gap-4 md:items-center md:justify-between">
+              <NbParagraph id="range-label" size="font-13" color="neutral" content={records.length ? `${start + 1}–${Math.min(start + PAGE_SIZE, records.length)} of ${records.length} parameters · 48 per page` : '0 parameters'} />
+              <NbPagination id="pagination" variant="number" activePage={currentPage} pageCount={pageCount}
+                enablePrevLink enableNextLink enableFirstLink={false} enableLastLink={false} enableGoToBox={false}
+                pageRangeDisplayed={3} breakLabel="…" onPageChange={(_, next) => setPage(Math.max(1, Math.min(next, pageCount)))} />
+            </div>
           </div>
         </NbPanel>
-      </main>
-      <footer className="save-bar">
-        <div className="save-status" role="status" aria-atomic="true">
-          <NbParagraph id="status-title" size="font-14" weight="font-medium"
-            content={saving ? 'Saving changes…' : changed.length ? `${changed.length} unsaved ${changed.length === 1 ? 'change' : 'changes'}` : notice || 'No unsaved changes'} />
-        </div>
-        <div className="save-actions">
-          <NbButton id="discard-button" caption="Discard changes" variant="secondary" size="medium" disabled={!changed.length || saving} onClick={discard} />
-          <NbButton id="save-button" caption={saving ? 'Saving…' : 'Save changes'} variant="primary" size="medium" disabled={!changed.length || saving} startIcon={{ iconKey: 'Save' }} onClick={save} />
-        </div>
-      </footer>
-    </div>
-    <NbDialogModal id="help-dialog" modalOpen={helpOpen} onClose={() => setHelpOpen(false)}
-      variant="dialog" size="sm" enableHeader enableCloseIcon enableFooter
-      headerDetail={{ titleTemplate: { id: 'help-title', content: 'System Parameter help', tag: 'h2', fontSize: 'font-18' } }}
-      body={<div className="help-content">
-        <NbParagraph id="help-sample" content="Sample data. Changes are saved in this browser only." size="font-14" enableWordWrap />
-        <NbParagraph id="help-edit" content="Edit System Parameter Value using the listed accepted values. Save changes applies all modified rows." size="font-14" enableWordWrap />
-        <NbParagraph id="help-shortcuts" content="Shortcuts: / to search, Tab to move between values, Ctrl or ⌘ + S to save." size="font-14" enableWordWrap />
-      </div>}
-      footerRight={{ primaryButtonProps: { id: 'help-done', caption: 'Done', variant: 'primary', onClick: () => setHelpOpen(false) } }} />
-  </>;
-}
 
-createRoot(document.getElementById('root')).render(<App />);
+        <div className="flex max-md:flex-col gap-4 md:items-center md:justify-between">
+          <div role="status" aria-atomic="true">
+            <NbParagraph id="status-title" size="font-14" weight="font-medium" content={statusText} />
+          </div>
+          <div className="flex items-center gap-2">
+            <NbButton id="discard-button" caption="Discard changes" variant="secondary" size="medium" disabled={!changed.length || saving} onClick={discard} />
+            <NbButton id="save-button" caption={saving ? 'Saving…' : 'Save changes'} variant="primary" size="medium" disabled={!changed.length || saving} startIcon={{ iconKey: 'Save' }} onClick={save} />
+          </div>
+        </div>
+      </section>
+
+      <NbDialogModal id="help-dialog" modalOpen={helpOpen} onClose={() => setHelpOpen(false)}
+        variant="dialog" size="sm" enableHeader enableCloseIcon enableFooter
+        headerDetail={{ titleTemplate: { id: 'help-title', content: 'System Parameter help', tag: 'h4', weight: 'font-semibold' } }}
+        body={<div className="flex flex-col gap-4">
+          <NbParagraph id="help-sample" content="Sample data. Changes are saved in this browser only." size="font-14" enableWordWrap />
+          <NbParagraph id="help-edit" content="Edit System Parameter Value using the listed accepted values. Save changes applies all modified rows." size="font-14" enableWordWrap />
+          <NbParagraph id="help-shortcuts" content="Shortcuts: / to search, Tab to move between values, Ctrl or Cmd + S to save." size="font-14" enableWordWrap />
+        </div>}
+        footerRight={{ primaryButtonProps: { id: 'help-done', caption: 'Done', variant: 'primary', size: 'medium', onClick: () => setHelpOpen(false) } }} />
+      </div>
+    </div>
+  );
+};
+
+export default SystemParameterPage;
+
+createRoot(document.getElementById('root')).render(<SystemParameterPage />);
