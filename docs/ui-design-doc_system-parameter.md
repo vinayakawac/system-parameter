@@ -14,7 +14,7 @@ Body-only page. The navbar, sidebar and app shell come from the runtime and are 
 
 | Region | Layout wrapper (Tailwind) | Nb* component | choose.md section |
 |---|---|---|---|
-| Icon rail (shell substitute) | `div` — `flex w-14 flex-col items-center gap-2 border-r border-gray-200 py-3`, `role="navigation"` | `NbActionIcon` × 5 (`Menu`, `Home`, `LayoutGrid`, `Settings` current with `showBorder`, `Filter`), all `size="medium"` | Action · Icon |
+| Blank rail (shell substitute) | `div` — `w-14 shrink-0 border-r border-gray-200`, `aria-hidden` | none | — |
 | Skip link | `div` — `sr-only focus-within:not-sr-only` | `NbHyperlink` (`variant="primary"`, `wordWrap="nowrap"`) | Links and navigation |
 | Page header row | `div` — `flex items-center justify-between gap-4 px-6 py-3` | `NbBreadcrumbs`; `NbBadge` (sample-data marker); `NbButton` ghost (Help) | Navigation · Display · Action |
 | Page title block | `div` — `flex flex-col gap-2` inside `section p-6 gap-6` | `NbHeading tag="h2"`; `NbParagraph size="font-13" color="neutral"` | Typography |
@@ -40,4 +40,4 @@ Body-only page. The navbar, sidebar and app shell come from the runtime and are 
 
 ## Shell substitute (remove when hosted in the runtime)
 
-A compact neutral icon rail on the left, requested by the product owner for the standalone prototype. It uses a light surface with a neutral border instead of the dark brand sidebar seen in rTask. The runtime shell replaces it, together with the top navbar and any fixed footer surfaces.
+A blank neutral rail on the left that reserves the sidebar width, requested by the product owner for the standalone prototype. It uses a light surface with a neutral border and no icons. The runtime shell replaces it, together with the top navbar and any fixed footer surfaces.

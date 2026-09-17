@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
-  NbActionIcon, NbBadge, NbBreadcrumbs, NbButton, NbDialogModal, NbEmptyState, NbHeading, NbHyperlink,
+  NbBadge, NbBreadcrumbs, NbButton, NbDialogModal, NbEmptyState, NbHeading, NbHyperlink,
   NbLoader, NbPagination, NbPanel, NbParagraph, NbTable, NbTextbox,
 } from '@ramco-platform/studio-components';
 import { parameters, validate } from './data.js';
@@ -153,16 +153,8 @@ const SystemParameterPage = () => {
 
   return (
     <div className="theme-rxd flex min-h-screen bg-white">
-      {/* Compact icon rail: stands in for the runtime shell's sidebar in this standalone prototype. */}
-      <div className="flex w-14 shrink-0 flex-col items-center gap-2 border-r border-gray-200 py-3" role="navigation" aria-label="Application navigation">
-        <NbActionIcon id="nav-menu" Icon="Menu" size="medium" variant="square" color="neutral" ariaLabel="Toggle navigation" tooltip="Menu" onClick={() => {}} />
-        <div className="mt-4 flex flex-col items-center gap-2">
-          <NbActionIcon id="nav-home" Icon="Home" size="medium" variant="square" color="neutral" ariaLabel="Home" tooltip="Home" onClick={() => {}} />
-          <NbActionIcon id="nav-projects" Icon="LayoutGrid" size="medium" variant="square" color="neutral" ariaLabel="Projects" tooltip="Projects" onClick={() => {}} />
-          <NbActionIcon id="nav-admin" Icon="Settings" size="medium" variant="square" color="primary" showBorder ariaLabel="Administration, current section" tooltip="Administration" onClick={() => {}} />
-          <NbActionIcon id="nav-filters" Icon="Filter" size="medium" variant="square" color="neutral" ariaLabel="Filters" tooltip="Filters" onClick={() => {}} />
-        </div>
-      </div>
+      {/* Blank rail: reserves the runtime shell's sidebar width in this standalone prototype. */}
+      <div className="w-14 shrink-0 border-r border-gray-200" aria-hidden="true" />
       <div className="flex min-w-0 flex-1 flex-col">
       <div className="sr-only focus-within:not-sr-only focus-within:fixed focus-within:top-2 focus-within:left-4 focus-within:z-50 focus-within:p-2">
         <NbHyperlink id="skip-to-main" url="#main" content="Skip to parameters" openLinkinSamePage variant="primary" wordWrap="nowrap" />
