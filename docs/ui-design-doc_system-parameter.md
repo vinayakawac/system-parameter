@@ -20,12 +20,12 @@ Body-only page. The navbar, sidebar and app shell come from the runtime and are 
 | Page title block | `div` — `flex flex-col gap-2` inside `section p-6 gap-6` | `NbHeading tag="h2"`; `NbParagraph size="font-13" color="neutral"` | Typography |
 | Titled section container | — | `NbPanel` (`enableborder`, no header, no padding; inner `div p-6 gap-4`) | Containers · Panel |
 | Section title | `div` — `flex items-center gap-2` | `NbHeading tag="h4"`; `NbBadge` (record count) | Typography · Display |
-| Toolbar | `div` — `flex md:flex-row md:justify-between gap-4` | `NbButton` × 2 (filter toggles, `ariaPressed`); `NbTextbox` search with `startIcon` | Action · Form inputs |
+| Toolbar | `div` — `flex md:justify-end` | `NbTextbox` search with `startIcon`. (A view-mode filter such as All / Modified would be `NbToggleButtonGroup`, not `NbTab`; removed because a single option remains.) | Form inputs |
 | Save error | `div role="alert"` | `NbParagraph color="error"` | Feedback |
 | Data region | `div` — `relative min-h-[240px] max-h-[640px] overflow-auto` | `NbTable` (`enableHeader`, `headerData` object, `tableData` rows); `NbLoader` (`position="container"`) while saving; `NbEmptyState` when no rows | Data · Feedback |
 | Row cells | `div` — `flex items-center gap-2` (value cell only) | `NbParagraph` (name, accepted, remarks); `NbTextbox` (value); `NbBadge` "Modified" when draft differs from saved | Form inputs · Display |
 | Pagination row | `div` — `flex md:justify-between gap-4` | `NbParagraph` range label; `NbPagination variant="number"` | Progress · Pagination |
-| Save actions | `div` — `flex md:justify-between gap-4` | `NbParagraph` status (`role="status"`); `NbButton` secondary (Discard); `NbButton` primary with `startIcon` (Save) | Action |
+| Sticky action bar (shell substitute) | `div` — `sticky bottom-0 mt-auto flex gap-4 border-t border-gray-200 bg-white px-6 py-4 md:justify-between` | `NbParagraph` status (`role="status"`); `NbButton` secondary (Discard); `NbButton` primary with `startIcon` (Save) | Action |
 | Help | — | `NbDialogModal size="sm"` with `NbParagraph` body and footer primary button | Overlay |
 
 ## Design-guideline decisions
@@ -36,7 +36,7 @@ Body-only page. The navbar, sidebar and app shell come from the runtime and are 
 - **Colour:** only via `color` props (`neutral`, `primary`, `error`). No colour or typography classes on wrappers.
 - **Data region states:** `NbLoader` during save, `NbEmptyState` for zero results.
 - **Responsive:** toolbar, pagination and action rows stack below `md`; table scrolls horizontally below 960px.
-- **Accessibility:** skip link, `role="group"` on filters, `role="alert"` on save error, `role="status"` on save state, `ariaDescribedby` from value to accepted-value cell.
+- **Accessibility:** skip link, `role="alert"` on save error, `role="status"` on save state, `ariaDescribedby` from value to accepted-value cell.
 
 ## Shell substitute (remove when hosted in the runtime)
 

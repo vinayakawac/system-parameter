@@ -24,7 +24,6 @@ const SystemParameterPage = () => {
   const [baseline, setBaseline] = useState(loadValues);
   const [drafts, setDrafts] = useState(() => ({ ...baseline }));
   const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState('all');
   const [page, setPage] = useState(1);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -40,15 +39,14 @@ const SystemParameterPage = () => {
   const changed = parameters.filter(p => drafts[p.id] !== baseline[p.id]);
   const normalizedQuery = query.trim().toLowerCase();
   const records = parameters.filter(p => p.id === activeId ||
-    ((filter === 'all' || drafts[p.id] !== baseline[p.id]) &&
-      (!normalizedQuery || [p.name, drafts[p.id], p.accepted, p.remarks]
-        .some(value => value.toLowerCase().includes(normalizedQuery)))));
+    !normalizedQuery || [p.name, drafts[p.id], p.accepted, p.remarks]
+      .some(value => value.toLowerCase().includes(normalizedQuery)));
   const pageCount = Math.max(1, Math.ceil(records.length / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount);
   const start = (currentPage - 1) * PAGE_SIZE;
   const visible = records.slice(start, start + PAGE_SIZE);
 
-  useEffect(() => { gridRef.current?.scrollTo({ top: 0 }); }, [currentPage, query, filter]);
+  useEffect(() => { gridRef.current?.scrollTo({ top: 0 }); }, [currentPage, query]);
   useEffect(() => {
     if (!focusId) return;
     const input = editorRefs.current[focusId]?.current;
@@ -72,7 +70,7 @@ const SystemParameterPage = () => {
     setActiveId(null);
   }
   function clearFilters() {
-    setQuery(''); setFilter('all'); setPage(1); setActiveId(null);
+    setQuery(''); setPage(1); setActiveId(null);
     searchRef.current?.focus();
   }
   async function save() {
@@ -82,7 +80,7 @@ const SystemParameterPage = () => {
     const invalidIds = Object.keys(nextErrors);
     if (invalidIds.length) {
       const first = invalidIds[0];
-      setFilter('all'); setQuery(''); setActiveId(null);
+      setQuery(''); setActiveId(null);
       setPage(Math.floor(parameters.findIndex(p => p.id === first) / PAGE_SIZE) + 1);
       setSaveError(`Correct ${invalidIds.length === 1 ? 'the highlighted value' : `the ${invalidIds.length} highlighted values`} and save again. Your changes are preserved.`);
       setNotice(''); setFocusId(first);
@@ -181,11 +179,7 @@ const SystemParameterPage = () => {
               <NbBadge id="total-count" content={parameters.length} color="neutral" size="medium" />
             </div>
 
-            <div className="flex max-md:flex-col gap-4 md:items-center md:justify-between">
-              <div className="flex flex-wrap items-center gap-2 shrink-0" role="group" aria-label="Filter parameters">
-                <NbButton id="filter-all" caption="All parameters" variant={filter === 'all' ? 'secondary' : 'ghost'} size="medium" ariaPressed={filter === 'all'} onClick={() => { setFilter('all'); setPage(1); }} />
-                <NbButton id="filter-modified" caption={`Modified (${changed.length})`} variant={filter === 'modified' ? 'secondary' : 'ghost'} size="medium" ariaPressed={filter === 'modified'} onClick={() => { setFilter('modified'); setPage(1); }} />
-              </div>
+            <div className="flex md:justify-end">
               <div className="max-md:w-full md:w-80 shrink-0">
                 <NbTextbox id="parameter-search" ref={searchRef} name="search" caption="Search parameters" hideCaption
                   value={query} placeholder="Search parameters…" autoFill="off" size="medium" enableInheritWidth
@@ -206,8 +200,8 @@ const SystemParameterPage = () => {
               </div>
               {!records.length && <NbEmptyState id="empty-state" enableText enableSubText enableButton1
                 enableImage={false} enableButton2={false}
-                text={{ id: 'empty-title', tag: 'h4', weight: 'font-semibold', content: filter === 'modified' && !query ? 'No modified parameters' : 'No matching parameters' }}
-                subText={{ id: 'empty-description', size: 'font-14', content: filter === 'modified' && !query ? 'Your changes will appear here as you edit values.' : 'Try a different name, value, or remark.' }}
+                text={{ id: 'empty-title', tag: 'h4', weight: 'font-semibold', content: 'No matching parameters' }}
+                subText={{ id: 'empty-description', size: 'font-14', content: 'Try a different name, value, or remark.' }}
                 button1={{ id: 'clear-filters', caption: 'View all parameters', variant: 'secondary', size: 'medium', onClick: clearFilters }} />}
             </div>
 
@@ -220,7 +214,10 @@ const SystemParameterPage = () => {
           </div>
         </NbPanel>
 
-        <div className="flex max-md:flex-col gap-4 md:items-center md:justify-between">
+      </section>
+
+      {/* Sticky action bar: stands in for the runtime shell's footer surface in this standalone prototype. */}
+      <div className="sticky bottom-0 z-10 mt-auto flex max-md:flex-col gap-4 border-t border-gray-200 bg-white px-6 py-4 md:items-center md:justify-between">
           <div role="status" aria-atomic="true">
             <NbParagraph id="status-title" size="font-14" weight="font-medium" content={statusText} />
           </div>
@@ -228,8 +225,7 @@ const SystemParameterPage = () => {
             <NbButton id="discard-button" caption="Discard changes" variant="secondary" size="medium" disabled={!changed.length || saving} onClick={discard} />
             <NbButton id="save-button" caption={saving ? 'Saving…' : 'Save changes'} variant="primary" size="medium" disabled={!changed.length || saving} startIcon={{ iconKey: 'Save' }} onClick={save} />
           </div>
-        </div>
-      </section>
+      </div>
 
       <NbDialogModal id="help-dialog" modalOpen={helpOpen} onClose={() => setHelpOpen(false)}
         variant="dialog" size="sm" enableHeader enableCloseIcon enableFooter
