@@ -14,8 +14,9 @@ main { padding: 24px 32px; }
 .panel-heading { padding: 20px 24px 16px; }
 .panel-toolbar { padding: 0 24px 16px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 .parameter-search { max-width: 320px; }
-.table-viewport { height: 697px; overflow: auto; border-block: 1px solid #eaecf0; }
+.table-viewport { height: 697px; overflow: auto; border-bottom: 1px solid #eaecf0; }
 .parameter-table { min-width: 960px; }
+#parameter-table { border-top-left-radius: 0; border-top-right-radius: 0; }
 .parameter-table table { width: 100%; table-layout: fixed; border-collapse: collapse; }
 .parameter-table thead { position: sticky; top: 0; z-index: 1; }
 .parameter-table th { background: #f2f4f7; height: 40px; }
