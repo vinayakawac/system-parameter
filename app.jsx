@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
-  NbBadge, NbBreadcrumbs, NbButton, NbEmptyState, NbHeading, NbHyperlink,
-  NbLoader, NbPagination, NbParagraph, NbSearch, NbTable, NbTextbox,
+  NbBadge, NbBreadcrumbs, NbButton, NbDropdown, NbEmptyState, NbHeading, NbHyperlink,
+  NbLoader, NbNumeric, NbParagraph, NbSearch, NbSwitch, NbTable, NbTextbox,
 } from '@ramco-platform/studio-components';
 import { parameters, validate } from './data.js';
 import './styles.css';
@@ -11,7 +11,6 @@ import './styles.css';
 // Composition plan: docs/ui-design-doc_system-parameter.md
 
 const STORAGE_KEY = 'rxd-system-parameters-v1';
-const PAGE_SIZE = 48;
 function loadValues() {
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {}; } catch { /* Use sample defaults. */ }
@@ -24,42 +23,38 @@ const SystemParameterPage = () => {
   const [baseline, setBaseline] = useState(loadValues);
   const [drafts, setDrafts] = useState(() => ({ ...baseline }));
   const [query, setQuery] = useState('');
-  const [page, setPage] = useState(1);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [notice, setNotice] = useState('');
   const [activeId, setActiveId] = useState(null);
-  const savingRef = useRef(false);
+  const [focusId, setFocusId] = useState(null);
   const [searchKey, setSearchKey] = useState(0);
+  const [resetKey, setResetKey] = useState(0); // Remounts uncontrolled NbDropdown editors after Discard.
+  const savingRef = useRef(false);
+  const gridRef = useRef(null);
   const focusSearch = () => document.getElementById('parameter-search')?.querySelector('input')?.focus();
   // NbSearch hard-codes its placeholder ("Search") and exposes no prop for it; set the attribute after mount.
   useEffect(() => {
     document.getElementById('parameter-search')?.querySelector('input')?.setAttribute('placeholder', 'Search parameters');
   }, [searchKey]);
-  const gridRef = useRef(null);
-  const editorRefs = useRef({});
-  const [focusId, setFocusId] = useState(null);
   const changed = parameters.filter(p => drafts[p.id] !== baseline[p.id]);
   const normalizedQuery = query.trim().toLowerCase();
   const records = parameters.filter(p => p.id === activeId ||
     !normalizedQuery || [p.name, drafts[p.id], p.accepted, p.remarks]
       .some(value => value.toLowerCase().includes(normalizedQuery)));
-  const pageCount = Math.max(1, Math.ceil(records.length / PAGE_SIZE));
-  const currentPage = Math.min(page, pageCount);
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const visible = records.slice(start, start + PAGE_SIZE);
 
-  useEffect(() => { gridRef.current?.scrollTo({ top: 0 }); }, [currentPage, query]);
+  useEffect(() => { gridRef.current?.scrollTo({ top: 0 }); }, [query]);
   useEffect(() => {
     if (!focusId) return;
-    const input = editorRefs.current[focusId]?.current;
+    const host = document.getElementById(`value-${focusId}`);
+    const input = host?.matches('input') ? host : host?.querySelector('input, button, [tabindex]');
     if (input) {
       input.focus({ preventScroll: true });
       input.scrollIntoView({ block: 'center' });
       setFocusId(null);
     }
-  }, [focusId, currentPage]);
+  }, [focusId]);
 
   function edit(p, value) {
     if (savingRef.current) return;
@@ -73,8 +68,14 @@ const SystemParameterPage = () => {
     setErrors(previous => ({ ...previous, [p.id]: value === baseline[p.id] ? '' : validate(p, value) }));
     setActiveId(null);
   }
+  // Discrete editors (switch, dropdown) commit a complete value in one step.
+  function commit(p, value) {
+    if (savingRef.current) return;
+    edit(p, value);
+    blur(p, value);
+  }
   function clearFilters() {
-    setQuery(''); setPage(1); setActiveId(null);
+    setQuery(''); setActiveId(null);
     setSearchKey(k => k + 1); // NbSearch is uncontrolled; remount to clear its field.
     setTimeout(focusSearch, 0);
   }
@@ -84,11 +85,9 @@ const SystemParameterPage = () => {
     setErrors(nextErrors);
     const invalidIds = Object.keys(nextErrors);
     if (invalidIds.length) {
-      const first = invalidIds[0];
-      setQuery(''); setActiveId(null);
-      setPage(Math.floor(parameters.findIndex(p => p.id === first) / PAGE_SIZE) + 1);
+      setQuery(''); setSearchKey(k => k + 1); setActiveId(null);
       setSaveError(`Correct ${invalidIds.length === 1 ? 'the highlighted value' : `the ${invalidIds.length} highlighted values`} and save again. Your changes are preserved.`);
-      setNotice(''); setFocusId(first);
+      setNotice(''); setFocusId(invalidIds[0]);
       return;
     }
     savingRef.current = true;
@@ -107,6 +106,7 @@ const SystemParameterPage = () => {
   function discard() {
     if (savingRef.current) return;
     setDrafts({ ...baseline }); setErrors({}); setSaveError(''); setActiveId(null);
+    setResetKey(k => k + 1);
     setNotice(`${changed.length} ${changed.length === 1 ? 'change' : 'changes'} discarded.`);
   }
   useEffect(() => {
@@ -130,18 +130,42 @@ const SystemParameterPage = () => {
     };
   });
 
-  const tableData = { data: visible.map(p => {
-    editorRefs.current[p.id] ||= React.createRef();
+  function renderEditor(p) {
+    const id = `value-${p.id}`;
+    const value = drafts[p.id];
+    const error = Boolean(errors[p.id]);
+    const caption = `${p.name} value`;
+    if (p.kind === 'number') {
+      return <NbNumeric id={id} value={value} caption={caption} size="medium" enableInheritWidth enableRightToLeft={false}
+        minValue={p.min} maxValue={p.max} resetValueOnBlur={false} incrementDecrementValue={1} precision={0}
+        disabled={saving} error={error} helpText={errors[p.id] || undefined} showHelpText={error}
+        blurTaskName="blur" onTask={task => { if (task === 'blur') blur(p, drafts[p.id]); }}
+        onValueChange={({ value: next }) => edit(p, next ?? '')} />;
+    }
+    if (p.kind === 'boolean') {
+      const on = value === 'Y';
+      return <NbSwitch id={id} name={p.id} checked={on} visibility caption={caption} hideCaption rightLabel={on ? 'Yes' : 'No'}
+        size="medium" disabled={saving} error={error} onChange={({ value: next }) => commit(p, next ? 'Y' : 'N')} />;
+    }
+    if (p.kind === 'choice') {
+      return <NbDropdown key={`${id}-${resetKey}`} id={id} caption={caption} hideCaption size="medium" variant="standard"
+        options={p.options.map(option => ({ label: option, value: option }))} isSearchable={false} portal
+        defaultSelectedOption={{ label: value, value }} enableInheritWidth disabled={saving} error={error}
+        hintText={errors[p.id] || ''} onSelect={option => { if (option) commit(p, option.value); }} />;
+    }
+    return <NbTextbox id={id} name={p.id} caption={caption} hideCaption size="medium" variant="standard"
+      value={value} disabled={saving} enableInheritWidth autoFill="off" disableSanitize
+      error={error} helpTask={errors[p.id] || undefined}
+      ariaDescribedby={error ? undefined : `accepted-${p.id}`}
+      onChange={({ value: next }) => edit(p, next)} onBlur={({ event }) => blur(p, event.target.value)} />;
+  }
+
+  const tableData = { data: records.map(p => {
     const modified = drafts[p.id] !== baseline[p.id];
     return { id: `row-${p.id}-`, text: [
       <NbParagraph key={`name-${p.id}`} id={`name-${p.id}`} content={p.name} size="font-13" weight="font-medium" enableTooltip />,
       <div key={`value-${p.id}`} className="flex items-start gap-2">
-        <NbTextbox id={`value-${p.id}`} ref={editorRefs.current[p.id]}
-          name={p.id} caption={`${p.name} value`} hideCaption size="medium" variant="standard"
-          value={drafts[p.id]} disabled={saving} enableInheritWidth autoFill="off" disableSanitize
-          error={Boolean(errors[p.id])} helpTask={errors[p.id] || undefined}
-          ariaDescribedby={errors[p.id] ? undefined : `accepted-${p.id}`}
-          onChange={({ value }) => edit(p, value)} onBlur={({ event }) => blur(p, event.target.value)} />
+        <div className="min-w-0 flex-1">{renderEditor(p)}</div>
         <div className={`flex h-9 shrink-0 items-center${modified ? '' : ' invisible'}`} aria-hidden={!modified}>
           <NbBadge id={`modified-${p.id}`} content="Modified" color="primary" size="medium" />
         </div>
@@ -175,16 +199,15 @@ const SystemParameterPage = () => {
         </div>
 
         <div id="parameter-panel" className="flex min-h-0 flex-1 flex-col gap-4">
-            <div className="flex shrink-0 items-center gap-2">
-              <NbHeading id="grid-title" content="Parameter details" tag="h4" weight="font-semibold" />
-              <NbBadge id="total-count" content={parameters.length} color="neutral" size="medium" />
-            </div>
-
-            <div className="flex shrink-0 md:justify-end">
+            <div className="flex shrink-0 max-md:flex-col gap-4 md:items-center md:justify-between">
+              <div className="flex items-center gap-2">
+                <NbHeading id="grid-title" content="Parameter details" tag="h4" weight="font-semibold" />
+                <NbBadge id="total-count" content={parameters.length} color="primary" borderType="with-border" size="medium" />
+              </div>
               <div className="max-md:w-full md:w-80 shrink-0">
                 <NbSearch key={searchKey} id="parameter-search" searchType="basic" caption="Search parameters" hideCaption
                   size="medium" enableInheritWidth enableKeydownSearch maxItems={0}
-                  onSelectItem={data => { const value = typeof data === 'string' ? data : (data?.value ?? ''); setQuery(value); setPage(1); setActiveId(null); }} />
+                  onSelectItem={data => { const value = typeof data === 'string' ? data : (data?.value ?? ''); setQuery(value); setActiveId(null); }} />
               </div>
             </div>
 
@@ -204,18 +227,10 @@ const SystemParameterPage = () => {
                 subText={{ id: 'empty-description', size: 'font-14', content: 'Try a different name, value, or remark.' }}
                 button1={{ id: 'clear-filters', caption: 'View all parameters', variant: 'secondary', size: 'medium', onClick: clearFilters }} />}
             </div>
-
-            <div className="flex shrink-0 max-md:flex-col gap-4 md:items-center md:justify-between">
-              <NbParagraph id="range-label" size="font-13" color="neutral" content={records.length ? `${start + 1}–${Math.min(start + PAGE_SIZE, records.length)} of ${records.length} parameters · 48 per page` : '0 parameters'} />
-              <NbPagination id="pagination" variant="number" activePage={currentPage} pageCount={pageCount}
-                enablePrevLink enableNextLink enableFirstLink={false} enableLastLink={false} enableGoToBox={false}
-                pageRangeDisplayed={3} breakLabel="…" onPageChange={(_, next) => setPage(Math.max(1, Math.min(next, pageCount)))} />
-            </div>
         </div>
-
       </section>
 
-      {/* Sticky action bar: stands in for the runtime shell's footer surface in this standalone prototype. */}
+      {/* Bottom action bar: stands in for the runtime shell's footer surface in this standalone prototype. */}
       <div className="flex shrink-0 max-md:flex-col gap-4 bg-white px-6! py-6 md:items-center md:justify-between">
           <div role="status" aria-atomic="true">
             <NbParagraph id="status-title" size="font-14" weight="font-medium" content={statusText} />
@@ -225,7 +240,6 @@ const SystemParameterPage = () => {
             <NbButton id="save-button" caption={saving ? 'Saving…' : 'Save changes'} variant="primary" size="medium" disabled={!changed.length || saving} startIcon={{ iconKey: 'Save' }} onClick={save} />
           </div>
       </div>
-
       </div>
     </div>
   );

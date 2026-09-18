@@ -19,12 +19,10 @@ Body-only page. The navbar, sidebar and app shell come from the runtime and are 
 | Page header row | `div` — `flex items-center justify-between gap-4 px-6! py-3` (important: Nebula ships an unlayered `*` padding reset that beats layered utilities here) | `NbBreadcrumbs` | Navigation |
 | Page title block | `div` — `flex flex-col gap-2` inside `section p-6 gap-6` | `NbHeading tag="h2"`; `NbParagraph size="font-13" color="neutral"` | Typography |
 | Section container | `div` — `flex min-h-0 flex-1 flex-col gap-4` (NbPanel dropped once border and header were removed; a bare panel added nothing and its internal wrappers cannot stretch to fill the viewport) | — | Containers |
-| Section title | `div` — `flex items-center gap-2` | `NbHeading tag="h4"`; `NbBadge` (record count) | Typography · Display |
-| Toolbar | `div` — `flex md:justify-end` | `NbSearch searchType="basic"` with `enableKeydownSearch` (as-you-type). NbTextbox + search icon is an explicit do-not-pick in the NbSearch Identity block. NbSearch is uncontrolled, so clearing remounts it via `key`. NbSearch also hard-codes its placeholder with no prop, so the page sets the input's placeholder attribute to "Search parameters" after mount; candidate Nebula feature request. (A view-mode filter such as All / Modified would be `NbToggleButtonGroup`, not `NbTab`; removed because a single option remains.) | Form inputs |
+| Section title row | `div` — `flex max-md:flex-col gap-4 md:items-center md:justify-between` | `NbHeading tag="h4"`; `NbBadge color="primary" borderType="with-border"` (outlined blue record count); `NbSearch` on the right of the same row | Typography · Display · Form inputs |
 | Save error | `div role="alert"` | `NbParagraph color="error"` (no `enableWordWrap`: that prop truncates to one line despite its name) | Feedback |
 | Data region | `div` — `relative min-h-0 flex-1 overflow-auto [&_thead]:sticky [&_thead]:top-0` plus `[&_.NbTable]:overflow-visible!` (the grid is the only scroll container; root is `h-screen overflow-hidden`; NbTable has no sticky prop and its own container scrolls, which would otherwise trap the sticky header) | `NbTable` (`enableHeader`, `headerData` object, `tableData` rows); `NbLoader` (`position="container"`) while saving; `NbEmptyState` when no rows | Data · Feedback |
-| Row cells | `div` — `flex items-start gap-2` (value cell only); badge wrapper `flex h-9 shrink-0 items-center`, `invisible` when unmodified so the input width and badge position never shift when a badge or validation message appears | `NbParagraph` (name, accepted, remarks); `NbTextbox` (value); `NbBadge` "Modified" when draft differs from saved | Form inputs · Display |
-| Pagination row | `div` — `flex md:justify-between gap-4` | `NbParagraph` range label; `NbPagination variant="number"` | Progress · Pagination |
+| Row cells | `div` — `flex items-start gap-2` (value cell); editor wrapper `min-w-0 flex-1`; badge wrapper `flex h-9 shrink-0 items-center`, `invisible` when unmodified | `NbParagraph` (name, accepted, remarks); value editor chosen by `kind` from `data.js`: `NbNumeric` (bounded whole numbers, built-in spinner, `resetValueOnBlur={false}` so range errors show), `NbSwitch` (Y / N, Yes/No right label), `NbDropdown` (fixed choice lists such as date formats, `isSearchable={false}`, `portal`, remounted via `key` on Discard because it is uncontrolled), `NbTextbox` (free text: document prefix); `NbBadge` "Modified" | Form inputs · Display |
 | Bottom action bar (shell substitute) | `div` — `flex shrink-0 gap-4 bg-white px-6! py-6 md:justify-between` (pinned by the fixed-height layout, no top border) | `NbParagraph` status (`role="status"`); `NbButton` secondary (Discard); `NbButton` primary with `startIcon` (Save) | Action |
 
 ## Design-guideline decisions
@@ -33,7 +31,7 @@ Body-only page. The navbar, sidebar and app shell come from the runtime and are 
 - **Hierarchy:** `h2` page title, `h4` section and dialog titles, supporting text `font-13 neutral`.
 - **Density:** single `medium` family for every button, textbox, badge and loader.
 - **Colour:** only via `color` props (`neutral`, `primary`, `error`). No colour or typography classes on wrappers.
-- **Data region states:** `NbLoader` during save, `NbEmptyState` for zero results.
+- **Data region states:** `NbLoader` during save, `NbEmptyState` for zero results. All 64 rows render in one page; no pagination.
 - **Responsive:** toolbar, pagination and action rows stack below `md`; table columns use percentage widths; only the grid scrolls, the page never does.
 - **Accessibility:** skip link, `role="alert"` on save error, `role="status"` on save state, `ariaDescribedby` from value to accepted-value cell.
 

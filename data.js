@@ -65,11 +65,25 @@ const records = [
   ['Default list page size', '48', '16 / 24 / 48 / 96', 'Default number of records returned for list views.'],
   ['Enable contextual help', 'Y', 'Y / N', 'Display contextual help within supported screens.'],
 ];
-export const parameters = records.map(([name, value, accepted, remarks, min, max], index) => ({ id: `p${index + 1}`, name, value, accepted, remarks, min, max }));
+function choicesOf(accepted) {
+  return accepted.includes(' · ') ? accepted.split(' · ') : accepted.split(' / ');
+}
+// Editor kind drives which Nebula input renders the value:
+// number -> NbNumeric (spinner), boolean -> NbSwitch, choice -> NbDropdown, text -> NbTextbox.
+function kindOf(name, accepted, min) {
+  if (min !== undefined) return 'number';
+  if (accepted === 'Y / N') return 'boolean';
+  if (name === 'Default document prefix') return 'text';
+  return 'choice';
+}
+export const parameters = records.map(([name, value, accepted, remarks, min, max], index) => {
+  const kind = kindOf(name, accepted, min);
+  return { id: `p${index + 1}`, name, value, accepted, remarks, min, max, kind, options: kind === 'choice' ? choicesOf(accepted) : undefined };
+});
 export function validate(parameter, value) {
   if (!value.trim()) return 'Enter a value.';
   if (parameter.min !== undefined) return /^\d+$/.test(value) && Number(value) >= parameter.min && Number(value) <= parameter.max ? '' : `Enter a whole number from ${parameter.min} to ${parameter.max}.`;
   if (parameter.name === 'Default document prefix') return /^[a-zA-Z0-9]{1,12}$/.test(value) ? '' : 'Use 1–12 letters or numbers.';
-  const choices = parameter.accepted.includes(' · ') ? parameter.accepted.split(' · ') : parameter.accepted.split(' / ');
+  const choices = choicesOf(parameter.accepted);
   return choices.includes(value) ? '' : `Use ${choices.join(' or ')}.`;
 }
