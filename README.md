@@ -72,4 +72,10 @@ Role–organization-unit access and enterprise services remain unconnected. Repl
 
 Enable the commit hook per clone with `git config core.hooksPath .githooks`. Tests use isolated temporary repositories and do not modify this repository's index.
 
-Vercel configuration and deployment are unchanged by the Nebula migration, at the user's request. The existing deployment setup predates the new private-package build requirements.
+## Vercel deployment
+
+`vercel.json` selects Vite, installs the locked dependencies with the same compatibility flags used locally (including build-time dev dependencies), runs `npm run build`, and publishes `dist/`. `package.json` selects Node.js 24. The production build includes the React app, Tailwind layout CSS, and Nebula assets used locally.
+
+Connect this repository with production branch `main` and the repository root as the Root Directory. Private Ramco packages require registry authentication before installation: configure the project's sensitive `NPM_RC` environment variable with the required registry configuration, following [Vercel's private dependency guide](https://vercel.com/kb/guide/using-private-dependencies-with-vercel). If that configuration references a token environment variable, configure it separately as sensitive too. Enable these for Production and, if needed, Preview. Never commit the local `.npmrc` or copy credentials into frontend variables.
+
+After configuring registry access, redeploy the latest `main` commit. Verify the production deployment succeeds; a Git push alone does not confirm deployment. Browser-local sample values are origin-specific, so saved localhost values do not transfer to the deployed site.
