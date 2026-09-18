@@ -131,14 +131,16 @@ const SystemParameterPage = () => {
     const modified = drafts[p.id] !== baseline[p.id];
     return { id: `row-${p.id}-`, text: [
       <NbParagraph key={`name-${p.id}`} id={`name-${p.id}`} content={p.name} size="font-13" weight="font-medium" enableTooltip />,
-      <div key={`value-${p.id}`} className="flex items-center gap-2">
+      <div key={`value-${p.id}`} className="flex items-start gap-2">
         <NbTextbox id={`value-${p.id}`} ref={editorRefs.current[p.id]}
           name={p.id} caption={`${p.name} value`} hideCaption size="medium" variant="standard"
           value={drafts[p.id]} disabled={saving} enableInheritWidth autoFill="off" disableSanitize
           error={Boolean(errors[p.id])} helpTask={errors[p.id] || undefined}
           ariaDescribedby={errors[p.id] ? undefined : `accepted-${p.id}`}
           onChange={({ value }) => edit(p, value)} onBlur={({ event }) => blur(p, event.target.value)} />
-        {modified && <NbBadge id={`modified-${p.id}`} content="Modified" color="primary" size="medium" />}
+        <div className={`flex h-9 shrink-0 items-center${modified ? '' : ' invisible'}`} aria-hidden={!modified}>
+          <NbBadge id={`modified-${p.id}`} content="Modified" color="primary" size="medium" />
+        </div>
       </div>,
       <NbParagraph key={`accepted-${p.id}`} id={`accepted-${p.id}`} content={p.accepted} size="font-13" enableTooltip />,
       <NbParagraph key={`remarks-${p.id}`} id={`remarks-${p.id}`} content={p.remarks} size="font-13" enableTooltip />,
