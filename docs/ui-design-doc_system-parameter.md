@@ -17,7 +17,7 @@ Body-only page. The navbar, sidebar and app shell come from the runtime and are 
 | Blank rail (shell substitute) | `div` — `w-14 shrink-0 border-r border-gray-200`, `aria-hidden` | none | — |
 | Skip link | `div` — `sr-only focus-within:not-sr-only` | `NbHyperlink` (`variant="primary"`, `wordWrap="nowrap"`) | Links and navigation |
 | Page header row | `div` — `flex items-center justify-between gap-4 px-6! py-3` (important: Nebula ships an unlayered `*` padding reset that beats layered utilities here) | `NbBreadcrumbs` | Navigation |
-| Page title block | `div` — `flex flex-col gap-2` inside `section p-6 gap-6` | `NbHeading tag="h2"`; `NbParagraph size="font-13" color="neutral"` | Typography |
+| Page title block | `div` — `flex flex-col gap-2` inside `section p-6 gap-6` | `NbHeading tag="h2"`; `NbParagraph size="font-13" color="#737F92"` (one step lighter than the `neutral` token, still about 4:1 on white) | Typography |
 | Section container | `div` — `flex min-h-0 flex-1 flex-col gap-4` (NbPanel dropped once border and header were removed; a bare panel added nothing and its internal wrappers cannot stretch to fill the viewport) | — | Containers |
 | Section title row | `div` — `flex max-md:flex-col gap-4 md:items-center md:justify-between` | `NbHeading tag="h4"`; `NbBadge color="primary" borderType="with-border"` (outlined blue record count); `NbSearch` on the right of the same row | Typography · Display · Form inputs |
 | Save error | `div role="alert"` | `NbParagraph color="error"` (no `enableWordWrap`: that prop truncates to one line despite its name) | Feedback |

@@ -195,7 +195,7 @@ const SystemParameterPage = () => {
       <section id="main" tabIndex={-1} className="flex min-h-0 flex-1 flex-col gap-6 p-6">
         <div className="flex shrink-0 flex-col gap-2">
           <NbHeading id="page-title" content="System Parameter" tag="h2" weight="font-semibold" />
-          <NbParagraph id="page-description" content="Edit System Parameter Value using the listed accepted values. Save changes applies all modified rows." size="font-13" color="neutral" />
+          <NbParagraph id="page-description" content="Edit System Parameter Value using the listed accepted values. Save changes applies all modified rows." size="font-13" color="#737F92" />
         </div>
 
         <div id="parameter-panel" className="flex min-h-0 flex-1 flex-col gap-4">
