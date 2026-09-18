@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   NbBadge, NbBreadcrumbs, NbButton, NbEmptyState, NbHeading, NbHyperlink,
-  NbLoader, NbPagination, NbParagraph, NbTable, NbTextbox,
+  NbLoader, NbPagination, NbParagraph, NbSearch, NbTable, NbTextbox,
 } from '@ramco-platform/studio-components';
 import { parameters, validate } from './data.js';
 import './styles.css';
@@ -31,7 +31,8 @@ const SystemParameterPage = () => {
   const [notice, setNotice] = useState('');
   const [activeId, setActiveId] = useState(null);
   const savingRef = useRef(false);
-  const searchRef = useRef(null);
+  const [searchKey, setSearchKey] = useState(0);
+  const focusSearch = () => document.getElementById('parameter-search')?.querySelector('input')?.focus();
   const gridRef = useRef(null);
   const editorRefs = useRef({});
   const [focusId, setFocusId] = useState(null);
@@ -70,7 +71,8 @@ const SystemParameterPage = () => {
   }
   function clearFilters() {
     setQuery(''); setPage(1); setActiveId(null);
-    searchRef.current?.focus();
+    setSearchKey(k => k + 1); // NbSearch is uncontrolled; remount to clear its field.
+    setTimeout(focusSearch, 0);
   }
   async function save() {
     if (!changed.length || savingRef.current) return;
@@ -110,7 +112,7 @@ const SystemParameterPage = () => {
       }
       if (event.key === '/' && !event.ctrlKey && !event.metaKey && !event.altKey &&
           !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
-        event.preventDefault(); searchRef.current?.focus();
+        event.preventDefault(); focusSearch();
       }
     }
     function beforeUnload(event) {
@@ -176,14 +178,13 @@ const SystemParameterPage = () => {
 
             <div className="flex shrink-0 md:justify-end">
               <div className="max-md:w-full md:w-80 shrink-0">
-                <NbTextbox id="parameter-search" ref={searchRef} name="search" caption="Search parameters" hideCaption
-                  value={query} placeholder="Search parameters…" autoFill="off" size="medium" enableInheritWidth
-                  startIcon={{ iconKey: 'Search' }}
-                  onChange={({ value }) => { setQuery(value); setPage(1); setActiveId(null); }} />
+                <NbSearch key={searchKey} id="parameter-search" searchType="basic" caption="Search parameters" hideCaption
+                  size="medium" enableInheritWidth enableKeydownSearch maxItems={0}
+                  onSelectItem={data => { const value = typeof data === 'string' ? data : (data?.value ?? ''); setQuery(value); setPage(1); setActiveId(null); }} />
               </div>
             </div>
 
-            {saveError && <div role="alert"><NbParagraph id="save-error" content={saveError} color="error" size="font-14" enableWordWrap /></div>}
+            {saveError && <div role="alert"><NbParagraph id="save-error" content={saveError} color="error" size="font-14" /></div>}
 
             <div className="relative min-h-0 flex-1 overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-[1] [&_.NbTable]:overflow-visible!" ref={gridRef} tabIndex={0} aria-label="Scrollable parameter grid">
               {saving && <NbLoader id="parameter-loader" active withOverlay={false} size="medium" position="container" caption="Saving…" enableCaption />}
