@@ -15,7 +15,7 @@
 .npmrc
 npmrc
 *.npmrc
-.npmrc.example
+!.npmrc.example
 .yarnrc
 .yarnrc.yml
 .netrc

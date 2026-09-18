@@ -76,6 +76,20 @@ Enable the commit hook per clone with `git config core.hooksPath .githooks`. Tes
 
 `vercel.json` selects Vite, installs the locked dependencies with the same compatibility flags used locally (including build-time dev dependencies), runs `npm run build`, and publishes `dist/`. `package.json` selects Node.js 24. The production build includes the React app, Tailwind layout CSS, and Nebula assets used locally.
 
-Connect this repository with production branch `main` and the repository root as the Root Directory. Private Ramco packages require registry authentication before installation: configure the project's sensitive `NPM_RC` environment variable with the required registry configuration, following [Vercel's private dependency guide](https://vercel.com/kb/guide/using-private-dependencies-with-vercel). If that configuration references a token environment variable, configure it separately as sensitive too. Enable these for Production and, if needed, Preview. Never commit the local `.npmrc` or copy credentials into frontend variables.
+Connect this repository with production branch `main` and the repository root as the Root Directory. In Vercel Project Settings → Environment Variables, add both variables for Production and, if needed, Preview:
+
+1. `NODE_AUTH_TOKEN`: a GitHub personal access token (classic) with `read:packages`, belonging to an account with read access to `@ramco-platform/studio-components`. Authorize it for the organization's SSO if required. Mark this variable sensitive.
+2. `NPM_RC`: paste the complete contents of the tracked `.npmrc.example`, preserving actual line breaks:
+
+```ini
+registry=https://registry.npmjs.org/
+@ramco-platform:registry=https://npm.pkg.github.com/
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+legacy-peer-deps=true
+```
+
+Keep `${NODE_AUTH_TOKEN}` literal in `NPM_RC`; put the actual token only in the separate sensitive variable. Do not wrap the configuration in quotes, encode it as JSON, or use literal `\n` characters in place of line breaks. The example file is not automatically loaded by npm. Vercel creates the active `.npmrc` from `NPM_RC` before installation; see [Vercel's private dependency guide](https://vercel.com/kb/guide/using-private-dependencies-with-vercel) and [GitHub's npm registry authentication requirements](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry).
+
+An install failure reporting `401 Unauthorized` and `authentication token not provided` means GitHub Packages received no token. Check both variables exist in the deployment's environment and that `NPM_RC` has the exact registry authentication line above. The dependency deprecation warnings are separate from this failure. Never commit the local `.npmrc` or copy credentials into frontend variables.
 
 After configuring registry access, redeploy the latest `main` commit. Verify the production deployment succeeds; a Git push alone does not confirm deployment. Browser-local sample values are origin-specific, so saved localhost values do not transfer to the deployed site.
