@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
-  NbBadge, NbBreadcrumbs, NbButton, NbDialogModal, NbEmptyState, NbHeading, NbHyperlink,
+  NbBadge, NbBreadcrumbs, NbButton, NbEmptyState, NbHeading, NbHyperlink,
   NbLoader, NbPagination, NbParagraph, NbTable, NbTextbox,
 } from '@ramco-platform/studio-components';
 import { parameters, validate } from './data.js';
@@ -29,7 +29,6 @@ const SystemParameterPage = () => {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [notice, setNotice] = useState('');
-  const [helpOpen, setHelpOpen] = useState(false);
   const [activeId, setActiveId] = useState(null);
   const savingRef = useRef(false);
   const searchRef = useRef(null);
@@ -106,7 +105,6 @@ const SystemParameterPage = () => {
   }
   useEffect(() => {
     function keydown(event) {
-      if (helpOpen) return;
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
         event.preventDefault(); save();
       }
@@ -164,7 +162,6 @@ const SystemParameterPage = () => {
         <NbBreadcrumbs id="breadcrumbs" items={[{ value: 'Administration' }, { value: 'System parameter' }]} handleBreadcrumbClick={() => {}} />
         <div className="flex items-center gap-2">
           <NbBadge id="sample-data" content="Sample data" color="neutral" size="medium" />
-          <NbButton id="help-button" caption="Help" ariaLabel="About this prototype" variant="ghost" size="medium" onClick={() => setHelpOpen(true)} />
         </div>
       </div>
 
@@ -227,15 +224,6 @@ const SystemParameterPage = () => {
           </div>
       </div>
 
-      <NbDialogModal id="help-dialog" modalOpen={helpOpen} onClose={() => setHelpOpen(false)}
-        variant="dialog" size="sm" enableHeader enableCloseIcon enableFooter
-        headerDetail={{ titleTemplate: { id: 'help-title', content: 'System Parameter help', tag: 'h4', weight: 'font-semibold' } }}
-        body={<div className="flex flex-col gap-4">
-          <NbParagraph id="help-sample" content="Sample data. Changes are saved in this browser only." size="font-14" enableWordWrap />
-          <NbParagraph id="help-edit" content="Edit System Parameter Value using the listed accepted values. Save changes applies all modified rows." size="font-14" enableWordWrap />
-          <NbParagraph id="help-shortcuts" content="Shortcuts: / to search, Tab to move between values, Ctrl or Cmd + S to save." size="font-14" enableWordWrap />
-        </div>}
-        footerRight={{ primaryButtonProps: { id: 'help-done', caption: 'Done', variant: 'primary', size: 'medium', onClick: () => setHelpOpen(false) } }} />
       </div>
     </div>
   );

@@ -16,7 +16,7 @@ Body-only page. The navbar, sidebar and app shell come from the runtime and are 
 |---|---|---|---|
 | Blank rail (shell substitute) | `div` — `w-14 shrink-0 border-r border-gray-200`, `aria-hidden` | none | — |
 | Skip link | `div` — `sr-only focus-within:not-sr-only` | `NbHyperlink` (`variant="primary"`, `wordWrap="nowrap"`) | Links and navigation |
-| Page header row | `div` — `flex items-center justify-between gap-4 px-6! py-3` (important: Nebula ships an unlayered `*` padding reset that beats layered utilities here) | `NbBreadcrumbs`; `NbBadge` (sample-data marker); `NbButton` ghost (Help) | Navigation · Display · Action |
+| Page header row | `div` — `flex items-center justify-between gap-4 px-6! py-3` (important: Nebula ships an unlayered `*` padding reset that beats layered utilities here) | `NbBreadcrumbs`; `NbBadge` (sample-data marker) | Navigation · Display |
 | Page title block | `div` — `flex flex-col gap-2` inside `section p-6 gap-6` | `NbHeading tag="h2"`; `NbParagraph size="font-13" color="neutral"` | Typography |
 | Section container | `div` — `flex min-h-0 flex-1 flex-col gap-4` (NbPanel dropped once border and header were removed; a bare panel added nothing and its internal wrappers cannot stretch to fill the viewport) | — | Containers |
 | Section title | `div` — `flex items-center gap-2` | `NbHeading tag="h4"`; `NbBadge` (record count) | Typography · Display |
@@ -26,7 +26,6 @@ Body-only page. The navbar, sidebar and app shell come from the runtime and are 
 | Row cells | `div` — `flex items-start gap-2` (value cell only); badge wrapper `flex h-9 shrink-0 items-center`, `invisible` when unmodified so the input width and badge position never shift when a badge or validation message appears | `NbParagraph` (name, accepted, remarks); `NbTextbox` (value); `NbBadge` "Modified" when draft differs from saved | Form inputs · Display |
 | Pagination row | `div` — `flex md:justify-between gap-4` | `NbParagraph` range label; `NbPagination variant="number"` | Progress · Pagination |
 | Bottom action bar (shell substitute) | `div` — `flex shrink-0 gap-4 bg-white px-6! py-6 md:justify-between` (pinned by the fixed-height layout, no top border) | `NbParagraph` status (`role="status"`); `NbButton` secondary (Discard); `NbButton` primary with `startIcon` (Save) | Action |
-| Help | — | `NbDialogModal size="sm"` with `NbParagraph` body and footer primary button | Overlay |
 
 ## Design-guideline decisions
 
