@@ -46,7 +46,11 @@ const SystemParameterPage = () => {
   const start = (currentPage - 1) * PAGE_SIZE;
   const visible = records.slice(start, start + PAGE_SIZE);
 
-  useEffect(() => { gridRef.current?.scrollTo({ top: 0 }); }, [currentPage, query]);
+  const firstRender = useRef(true);
+  useEffect(() => {
+    if (firstRender.current) { firstRender.current = false; return; }
+    gridRef.current?.scrollIntoView({ block: 'start' });
+  }, [currentPage]);
   useEffect(() => {
     if (!focusId) return;
     const input = editorRefs.current[focusId]?.current;
@@ -190,9 +194,9 @@ const SystemParameterPage = () => {
 
             {saveError && <div role="alert"><NbParagraph id="save-error" content={saveError} color="error" size="font-14" enableWordWrap /></div>}
 
-            <div className="relative min-h-[240px] max-h-[640px] overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-[1] [&_.NbTable]:overflow-visible!" ref={gridRef} tabIndex={0} aria-label="Scrollable parameter grid">
+            <div className="relative min-h-[240px] scroll-mt-6 [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-[1] [&_.NbTable]:overflow-visible!" ref={gridRef}>
               {saving && <NbLoader id="parameter-loader" active withOverlay={false} size="medium" position="container" caption="Saving…" enableCaption />}
-              <div className="min-w-[960px]">
+              <div>
                 <NbTable id="parameter-table" hideCaption
                   caption="System parameters. Only System Parameter Value is editable."
                   enableHeader enableFooter={false} variant="default"
