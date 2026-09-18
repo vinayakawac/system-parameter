@@ -160,7 +160,7 @@ const SystemParameterPage = () => {
         <NbHyperlink id="skip-to-main" url="#main" content="Skip to parameters" openLinkinSamePage variant="primary" wordWrap="nowrap" />
       </div>
 
-      <div className="flex shrink-0 items-center justify-between gap-4 px-6 py-3">
+      <div className="flex shrink-0 items-center justify-between gap-4 px-6! py-3">
         <NbBreadcrumbs id="breadcrumbs" items={[{ value: 'Administration' }, { value: 'System parameter' }]} handleBreadcrumbClick={() => {}} />
         <div className="flex items-center gap-2">
           <NbBadge id="sample-data" content="Sample data" color="neutral" size="medium" />
@@ -217,7 +217,7 @@ const SystemParameterPage = () => {
       </section>
 
       {/* Sticky action bar: stands in for the runtime shell's footer surface in this standalone prototype. */}
-      <div className="flex shrink-0 max-md:flex-col gap-4 bg-white px-12 py-6 md:items-center md:justify-between">
+      <div className="flex shrink-0 max-md:flex-col gap-4 bg-white px-6! py-6 md:items-center md:justify-between">
           <div role="status" aria-atomic="true">
             <NbParagraph id="status-title" size="font-14" weight="font-medium" content={statusText} />
           </div>
