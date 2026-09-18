@@ -25,7 +25,7 @@ Body-only page. The navbar, sidebar and app shell come from the runtime and are 
 | Data region | `div` — `relative min-h-[240px] max-h-[640px] overflow-auto [&_thead]:sticky [&_thead]:top-0` plus `[&_.NbTable]:overflow-visible!` (sticky header positioned from the scroll wrapper; NbTable has no sticky prop and its own container scrolls, which would otherwise trap the sticky header) | `NbTable` (`enableHeader`, `headerData` object, `tableData` rows); `NbLoader` (`position="container"`) while saving; `NbEmptyState` when no rows | Data · Feedback |
 | Row cells | `div` — `flex items-center gap-2` (value cell only) | `NbParagraph` (name, accepted, remarks); `NbTextbox` (value); `NbBadge` "Modified" when draft differs from saved | Form inputs · Display |
 | Pagination row | `div` — `flex md:justify-between gap-4` | `NbParagraph` range label; `NbPagination variant="number"` | Progress · Pagination |
-| Sticky action bar (shell substitute) | `div` — `sticky bottom-0 mt-auto flex gap-4 border-t border-gray-200 bg-white px-6 py-4 md:justify-between` | `NbParagraph` status (`role="status"`); `NbButton` secondary (Discard); `NbButton` primary with `startIcon` (Save) | Action |
+| Sticky action bar (shell substitute) | `div` — `sticky bottom-0 mt-auto flex gap-4 bg-white px-12 py-6 md:justify-between` (no top border) | `NbParagraph` status (`role="status"`); `NbButton` secondary (Discard); `NbButton` primary with `startIcon` (Save) | Action |
 | Help | — | `NbDialogModal size="sm"` with `NbParagraph` body and footer primary button | Overlay |
 
 ## Design-guideline decisions

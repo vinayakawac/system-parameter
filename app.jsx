@@ -217,7 +217,7 @@ const SystemParameterPage = () => {
       </section>
 
       {/* Sticky action bar: stands in for the runtime shell's footer surface in this standalone prototype. */}
-      <div className="sticky bottom-0 z-10 mt-auto flex max-md:flex-col gap-4 border-t border-gray-200 bg-white px-6 py-4 md:items-center md:justify-between">
+      <div className="sticky bottom-0 z-10 mt-auto flex max-md:flex-col gap-4 bg-white px-12 py-6 md:items-center md:justify-between">
           <div role="status" aria-atomic="true">
             <NbParagraph id="status-title" size="font-14" weight="font-medium" content={statusText} />
           </div>
