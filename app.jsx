@@ -160,9 +160,6 @@ const SystemParameterPage = () => {
 
       <div className="flex shrink-0 items-center justify-between gap-4 px-6! py-3">
         <NbBreadcrumbs id="breadcrumbs" items={[{ value: 'Administration' }, { value: 'System parameter' }]} handleBreadcrumbClick={() => {}} />
-        <div className="flex items-center gap-2">
-          <NbBadge id="sample-data" content="Sample data" color="neutral" size="medium" />
-        </div>
       </div>
 
       <section id="main" tabIndex={-1} className="flex min-h-0 flex-1 flex-col gap-6 p-6">

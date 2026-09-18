@@ -16,7 +16,7 @@ Body-only page. The navbar, sidebar and app shell come from the runtime and are 
 |---|---|---|---|
 | Blank rail (shell substitute) | `div` — `w-14 shrink-0 border-r border-gray-200`, `aria-hidden` | none | — |
 | Skip link | `div` — `sr-only focus-within:not-sr-only` | `NbHyperlink` (`variant="primary"`, `wordWrap="nowrap"`) | Links and navigation |
-| Page header row | `div` — `flex items-center justify-between gap-4 px-6! py-3` (important: Nebula ships an unlayered `*` padding reset that beats layered utilities here) | `NbBreadcrumbs`; `NbBadge` (sample-data marker) | Navigation · Display |
+| Page header row | `div` — `flex items-center justify-between gap-4 px-6! py-3` (important: Nebula ships an unlayered `*` padding reset that beats layered utilities here) | `NbBreadcrumbs` | Navigation |
 | Page title block | `div` — `flex flex-col gap-2` inside `section p-6 gap-6` | `NbHeading tag="h2"`; `NbParagraph size="font-13" color="neutral"` | Typography |
 | Section container | `div` — `flex min-h-0 flex-1 flex-col gap-4` (NbPanel dropped once border and header were removed; a bare panel added nothing and its internal wrappers cannot stretch to fill the viewport) | — | Containers |
 | Section title | `div` — `flex items-center gap-2` | `NbHeading tag="h4"`; `NbBadge` (record count) | Typography · Display |
