@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   NbBadge, NbBreadcrumbs, NbButton, NbDialogModal, NbEmptyState, NbHeading, NbHyperlink,
-  NbLoader, NbPagination, NbPanel, NbParagraph, NbTable, NbTextbox,
+  NbLoader, NbPagination, NbParagraph, NbTable, NbTextbox,
 } from '@ramco-platform/studio-components';
 import { parameters, validate } from './data.js';
 import './styles.css';
@@ -46,11 +46,7 @@ const SystemParameterPage = () => {
   const start = (currentPage - 1) * PAGE_SIZE;
   const visible = records.slice(start, start + PAGE_SIZE);
 
-  const firstRender = useRef(true);
-  useEffect(() => {
-    if (firstRender.current) { firstRender.current = false; return; }
-    gridRef.current?.scrollIntoView({ block: 'start' });
-  }, [currentPage]);
+  useEffect(() => { gridRef.current?.scrollTo({ top: 0 }); }, [currentPage, query]);
   useEffect(() => {
     if (!focusId) return;
     const input = editorRefs.current[focusId]?.current;
@@ -154,15 +150,15 @@ const SystemParameterPage = () => {
     : notice || 'No unsaved changes';
 
   return (
-    <div className="theme-rxd flex min-h-screen bg-white">
+    <div className="theme-rxd flex h-screen overflow-hidden bg-white">
       {/* Blank rail: reserves the runtime shell's sidebar width in this standalone prototype. */}
       <div className="w-14 shrink-0 border-r border-gray-200" aria-hidden="true" />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <div className="sr-only focus-within:not-sr-only focus-within:fixed focus-within:top-2 focus-within:left-4 focus-within:z-50 focus-within:p-2">
         <NbHyperlink id="skip-to-main" url="#main" content="Skip to parameters" openLinkinSamePage variant="primary" wordWrap="nowrap" />
       </div>
 
-      <div className="flex items-center justify-between gap-4 px-6 py-3">
+      <div className="flex shrink-0 items-center justify-between gap-4 px-6 py-3">
         <NbBreadcrumbs id="breadcrumbs" items={[{ value: 'Administration' }, { value: 'System parameter' }]} handleBreadcrumbClick={() => {}} />
         <div className="flex items-center gap-2">
           <NbBadge id="sample-data" content="Sample data" color="neutral" size="medium" />
@@ -170,20 +166,19 @@ const SystemParameterPage = () => {
         </div>
       </div>
 
-      <section id="main" tabIndex={-1} className="flex flex-col gap-6 p-6">
-        <div className="flex flex-col gap-2">
+      <section id="main" tabIndex={-1} className="flex min-h-0 flex-1 flex-col gap-6 p-6">
+        <div className="flex shrink-0 flex-col gap-2">
           <NbHeading id="page-title" content="System Parameter" tag="h2" weight="font-semibold" />
           <NbParagraph id="page-description" content="Edit System Parameter Value using the listed accepted values. Save changes applies all modified rows." size="font-13" color="neutral" />
         </div>
 
-        <NbPanel id="parameter-panel" showHeader={false} hideCaption enableborder={false} enableShadow={false} enablePadding={false}>
-          <div className="flex flex-col gap-4 p-6">
-            <div className="flex items-center gap-2">
+        <div id="parameter-panel" className="flex min-h-0 flex-1 flex-col gap-4">
+            <div className="flex shrink-0 items-center gap-2">
               <NbHeading id="grid-title" content="Parameter details" tag="h4" weight="font-semibold" />
               <NbBadge id="total-count" content={parameters.length} color="neutral" size="medium" />
             </div>
 
-            <div className="flex md:justify-end">
+            <div className="flex shrink-0 md:justify-end">
               <div className="max-md:w-full md:w-80 shrink-0">
                 <NbTextbox id="parameter-search" ref={searchRef} name="search" caption="Search parameters" hideCaption
                   value={query} placeholder="Search parameters…" autoFill="off" size="medium" enableInheritWidth
@@ -194,7 +189,7 @@ const SystemParameterPage = () => {
 
             {saveError && <div role="alert"><NbParagraph id="save-error" content={saveError} color="error" size="font-14" enableWordWrap /></div>}
 
-            <div className="relative min-h-[240px] scroll-mt-6 [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-[1] [&_.NbTable]:overflow-visible!" ref={gridRef}>
+            <div className="relative min-h-0 flex-1 overflow-auto [&_thead]:sticky [&_thead]:top-0 [&_thead]:z-[1] [&_.NbTable]:overflow-visible!" ref={gridRef} tabIndex={0} aria-label="Scrollable parameter grid">
               {saving && <NbLoader id="parameter-loader" active withOverlay={false} size="medium" position="container" caption="Saving…" enableCaption />}
               <div>
                 <NbTable id="parameter-table" hideCaption
@@ -209,19 +204,18 @@ const SystemParameterPage = () => {
                 button1={{ id: 'clear-filters', caption: 'View all parameters', variant: 'secondary', size: 'medium', onClick: clearFilters }} />}
             </div>
 
-            <div className="flex max-md:flex-col gap-4 md:items-center md:justify-between">
+            <div className="flex shrink-0 max-md:flex-col gap-4 md:items-center md:justify-between">
               <NbParagraph id="range-label" size="font-13" color="neutral" content={records.length ? `${start + 1}–${Math.min(start + PAGE_SIZE, records.length)} of ${records.length} parameters · 48 per page` : '0 parameters'} />
               <NbPagination id="pagination" variant="number" activePage={currentPage} pageCount={pageCount}
                 enablePrevLink enableNextLink enableFirstLink={false} enableLastLink={false} enableGoToBox={false}
                 pageRangeDisplayed={3} breakLabel="…" onPageChange={(_, next) => setPage(Math.max(1, Math.min(next, pageCount)))} />
             </div>
-          </div>
-        </NbPanel>
+        </div>
 
       </section>
 
       {/* Sticky action bar: stands in for the runtime shell's footer surface in this standalone prototype. */}
-      <div className="sticky bottom-0 z-10 mt-auto flex max-md:flex-col gap-4 bg-white px-12 py-6 md:items-center md:justify-between">
+      <div className="flex shrink-0 max-md:flex-col gap-4 bg-white px-12 py-6 md:items-center md:justify-between">
           <div role="status" aria-atomic="true">
             <NbParagraph id="status-title" size="font-14" weight="font-medium" content={statusText} />
           </div>
