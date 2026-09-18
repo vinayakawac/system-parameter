@@ -33,6 +33,10 @@ const SystemParameterPage = () => {
   const savingRef = useRef(false);
   const [searchKey, setSearchKey] = useState(0);
   const focusSearch = () => document.getElementById('parameter-search')?.querySelector('input')?.focus();
+  // NbSearch hard-codes its placeholder ("Search") and exposes no prop for it; set the attribute after mount.
+  useEffect(() => {
+    document.getElementById('parameter-search')?.querySelector('input')?.setAttribute('placeholder', 'Search parameters');
+  }, [searchKey]);
   const gridRef = useRef(null);
   const editorRefs = useRef({});
   const [focusId, setFocusId] = useState(null);
